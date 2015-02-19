@@ -16,13 +16,12 @@ or ill. This is why this is a seperate project from guild.
 
 ## WIP
 
-
+    from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
 
 ## Core
 
 These aren't written yet.
 
-    from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
     from guild.kamaelia import Graphline            # from Kamaelia.Chassis.Graphline
     from guild.kamaelia import PureTransformer      # from Kamaelia.Util.PureTransformer
     from guild.kamaelia import PAR                  # from Kamaelia.Chassis.PAR
