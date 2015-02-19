@@ -19,6 +19,11 @@ for actor_class_name in ["ReadFileAdaptor" ]:
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+#FIXME: Probably ought to shift out from here.
+class producerFinished(object):
+   def __init__(self,caller=None,message=None):
+      self.caller = caller
+      self.message = message
 
 class ReadFileAdaptor(Actor):
     def __init__(self, filename="",
@@ -77,6 +82,7 @@ class ReadFileAdaptor(Actor):
         data = self.f.read(self.readsize)
         if not data:
             self.signal( producerFinished(self) )
+            self.stop()
         return data
 
     def getDataReadline(self):
@@ -88,6 +94,7 @@ class ReadFileAdaptor(Actor):
         data = self.f.readline()
         if not data:
             self.signal( producerFinished(self) )
+            self.stop()
         return data
 
     @process_method
