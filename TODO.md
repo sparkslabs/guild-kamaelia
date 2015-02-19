@@ -1,14 +1,26 @@
 ## The Todo list
 
-This is a list of components that need writing, where they will sit in the namespace
-and where they sit inside the Kamaelia namespace. They'll probably actually exist inside
-specific files and be pulled in, but the API will remain this. Probably.
+This is a list of components that need writing, where they will sit
+in the namespace and where they sit inside the Kamaelia namespace.
+They'll probably actually exist inside specific files and be pulled in,
+but the API will remain this. Probably.
 
-Remember, these aren't written yet.
+Key point - this isn't about improving or changing the component functionality, but 
+about bringing the functionality into Guild with the same API as Kamaelia - for good
+or ill. This is why this is a seperate project from guild.
+
+## Done
+
+    from guild.kamaelia import ReadFileAdaptor      # from Kamaelia.File.ReadFileAdaptor
+
+## WIP
+
+
 
 ## Core
 
-    from guild.kamaelia import ReadFileAdaptor      # from Kamaelia.File.ReadFileAdaptor
+These aren't written yet.
+
     from guild.kamaelia import ConsoleEchoer        # from Kamaelia.Util.Console
     from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
     from guild.kamaelia import Graphline            # from Kamaelia.Chassis.Graphline
@@ -30,6 +42,8 @@ Items marked # should be done first
 
 ## Required by Core:
 
+These aren't written yet.
+
     from guild.kamaelia import SimpleServer         # from Kamaelia.Chassis.ConnectedServer
     from guild.kamaelia import ServerCore           # from Kamaelia.Chassis.ConnectedServer
     from guild.kamaelia import NoActivityTimeout    # from Kamaelia.Internet.TimeOutCSA
@@ -37,6 +51,8 @@ Items marked # should be done first
     from guild.kamaelia import ConnectedSocketAdapter   # from Kamaelia.Internet.ConnectedSocketAdapter
 
 ## Secondary:
+
+These aren't written yet.
 
     from guild.kamaelia import Seq                  # from Kamaelia.Chassis.Seq import Seq
     from guild.kamaelia import TwoWaySplitter       # from Kamaelia.Util.TwoWaySplitter
