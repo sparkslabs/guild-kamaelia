@@ -124,6 +124,10 @@ class ReadFileAdaptor(Actor):
     @late_bind_safe
     def signal(self, signal_data):
         pass
+    
+    # For Kamaelia compatibility...
+    inbox = input
+    outbox = output
 
 if __name__ == "__main__":
     import sys

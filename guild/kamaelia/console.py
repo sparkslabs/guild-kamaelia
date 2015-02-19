@@ -51,6 +51,11 @@ class ConsoleEchoer(Actor):
     def signal(self, value):
         pass
 
+    # For Kamaelia compatibility...
+    inbox = input
+    outbox = output
+
+
 if __name__ == "__main__":
     import time
     from readfileadaptor import ReadFileAdaptor
