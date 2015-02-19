@@ -8,6 +8,7 @@ from guild.actor import *
 import time
 import os
 import logging
+import math
 
 #FIXME: This isn't ideal, but better than nothing for the moment
 for actor_class_name in ["ReadFileAdaptor" ]:
@@ -44,7 +45,7 @@ class ReadFileAdaptor(Actor):
             self.bitrate = bitrate
             self.chunkrate = chunkrate
             self.steptime = 1.0 / chunkrate        # Internally bitrate is semantic sugar for block mode.
-            self.readsize = (bitrate/8) / chunkrate
+            self.readsize = int(math.ceil((bitrate/8) / chunkrate))
             self.getData = self.getDataByteLen
 
         if readmode=="line" or not(readmode):
