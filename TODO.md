@@ -12,6 +12,7 @@ or ill. This is why this is a seperate project from guild.
 ## Done
 
     from guild.kamaelia import ReadFileAdaptor      # from Kamaelia.File.ReadFileAdaptor
+    from guild.kamaelia import ConsoleEchoer        # from Kamaelia.Util.Console
 
 ## WIP
 
@@ -21,7 +22,6 @@ or ill. This is why this is a seperate project from guild.
 
 These aren't written yet.
 
-    from guild.kamaelia import ConsoleEchoer        # from Kamaelia.Util.Console
     from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
     from guild.kamaelia import Graphline            # from Kamaelia.Chassis.Graphline
     from guild.kamaelia import PureTransformer      # from Kamaelia.Util.PureTransformer
