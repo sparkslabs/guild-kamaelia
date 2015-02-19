@@ -9,11 +9,9 @@ import time
 import os
 import logging
 
-class EOF(Exception):
-    pass
-
+#FIXME: This isn't ideal, but better than nothing for the moment
 for actor_class_name in ["ReadFileAdaptor" ]:
-    logger = logging.getLogger('__main__.' + actor_class_name)
+    logger = logging.getLogger(__name__ +"." + actor_class_name)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
