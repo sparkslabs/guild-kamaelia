@@ -18,13 +18,19 @@ for actor_class_name in ["ConsoleEchoer" ]:
     logger.addHandler(ch)
 
 
-class Pipeline(component):
+class Pipeline(Actor):
     circular = False
     def __init__(self, *components, **argv):
-        (Pipeline,self).__init__(**argv)
+        super(Pipeline,self).__init__()
         self.components = list(components)
-        self.input = self.components[0].input
-        self.control = self.components[0].control
+        try:
+            self.input = self.components[0].input
+        except:
+            pass
+        try:
+            self.control = self.components[0].control
+        except:
+            pass
         
     def process_start(self):
         last = self.components[0]
@@ -32,9 +38,12 @@ class Pipeline(component):
             pipe(last,"output", dest,"input") # FIXME: Should this be inbox/input , outbox/output ?
             pipe(last,"signal", dest,"control")
             last = dest # Keep track of last
-      if self.circular:
+        if self.circular:
             pipe(last,"output", self.components[0],"input") # FIXME: Should this be inbox/input , outbox/output ?
             pipe(last,"signal", self.components[0],"control")
+
+        for dest in self.components:
+            dest.go()
 
     @process_method
     def process(self):
@@ -55,11 +64,17 @@ class Pipeline(component):
     # These are probably bypassed, but for now left in place.
     @actor_method
     def input(self, data):
-       self.components[0].input(data)
+        try:
+            self.components[0].input(data)
+        except:
+            pass
  
     @actor_method
     def control(self, data):
-       self.components[0].control(data)
+        try:
+            self.components[0].control(data)
+        except:
+            pass
 
 
     # These two are for introspection, but will not actually be bound to.
@@ -70,3 +85,17 @@ class Pipeline(component):
     @late_bind_safe
     def signal(self, value):
         pass
+
+if __name__ == "__main__":
+    import time
+    from readfileadaptor import ReadFileAdaptor
+    from console import ConsoleEchoer
+    
+    p = Pipeline(
+                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                ConsoleEchoer()
+        )
+    
+    p.go()
+
+    wait_for(p)
