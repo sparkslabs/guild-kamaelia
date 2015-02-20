@@ -61,4 +61,14 @@ These aren't written yet.
     from guild.kamaelia import PromptedFileReader   # from Kamaelia.File.Reading
     from guild.kamaelia import RateControlledFileReader # from Kamaelia.File.Reading
 
+## Ideas arising
+
+### Possible new names or alternatives for Graphline
+
+In particular, worth noting that Graphline actually subsumbes the
+functionality of PAR
+
+from guild.kamaelia import Breadboard # Graphline?  No, no new names in this namespace
+from guild.kamaelia import Composite # Graphline?   No, no new names in this namespace
+from guild.kamaelia import Compound # Graphline?   No, no new names in this namespace
 
