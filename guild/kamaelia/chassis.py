@@ -32,7 +32,6 @@ class Graphline(Actor):
         print "EXTERNAL POSTBOXES NOT DONE"
 
     def borderLinkage(self, fromComponent, sourceBox, toComponent, toBox):
-        print "OUT LINKAGES NOT WRITTEN"
         print "DYNAMIC IN LINKAGES NOT TESTED"
         print "DYNAMIC OUT LINKAGES NOT TESTED"
         if fromComponent == self:
@@ -42,6 +41,15 @@ class Graphline(Actor):
             print "INLINK", fromComponent, sourceBox, toComponent, toBox
         else:
             self.border_outlinks[toBox] = fromComponent, sourceBox
+
+    @actor_method
+    def bind(self, source_box, dest, destmeth):
+        # Bind our output function to their input
+        # In this case it means bind our last child's output...
+        if len(self.components.values()):
+            component, methodname = self.border_outlinks[source_box]
+            component.bind(methodname, dest, destmeth)
+
 
     def process_start(self):
         if self.layout:
@@ -171,22 +179,37 @@ if __name__ == "__main__":
     import time
     from readfileadaptor import ReadFileAdaptor
     from console import ConsoleEchoer
-
     p = Pipeline(
-                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-                Graphline(
-                            ce = ConsoleEchoer(tag="** BASICTEST 1**"),
-                            linkages = {
-                                ("self", "input") : ("ce", "input"),
-                                ("self", "control") : ("ce", "control")
-                                }
-                        )
+                    Graphline(
+                                RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                linkages = {
+                                    ("RFA", "output") : ("self", "output"),
+                                    ("RFA", "signal") : ("self", "signal")
+                                    }
+                            ),
+                    ConsoleEchoer(tag="** BASICTEST 1**"),
                 )
 
     p.go()
     wait_for(p)
 
+
     if 0:
+        p = Pipeline(
+                    ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                    Graphline(
+                                ce = ConsoleEchoer(tag="** BASICTEST 1**"),
+                                linkages = {
+                                    ("self", "input") : ("ce", "input"),
+                                    ("self", "control") : ("ce", "control")
+                                    }
+                            )
+                    )
+
+        p.go()
+        wait_for(p)
+
+
         g = Graphline(
                     p1 = Pipeline(
                                     ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
