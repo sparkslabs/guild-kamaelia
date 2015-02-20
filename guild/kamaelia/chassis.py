@@ -34,16 +34,17 @@ class Graphline(Actor):
         print "BORDER LINKAGES NOT DONE"
 
     def process_start(self):
-        for componentRef,sourceBox in self.layout:
-            toRef, toBox = self.layout[(componentRef,sourceBox)]
+        if self.layout:
+            for componentRef,sourceBox in self.layout:
+                toRef, toBox = self.layout[(componentRef,sourceBox)]
 
-            fromComponent = self.components.get(componentRef, self)
-            toComponent = self.components.get(toRef, self)
-            if fromComponent == self or toComponent == self:
-                self.borderLinkage()
-                continue # skip linkages to/from the graphline for now
+                fromComponent = self.components.get(componentRef, self)
+                toComponent = self.components.get(toRef, self)
+                if fromComponent == self or toComponent == self:
+                    self.borderLinkage()
+                    continue # skip linkages to/from the graphline for now
 
-            pipe(fromComponent, sourceBox, toComponent, toBox)
+                pipe(fromComponent, sourceBox, toComponent, toBox)
 
         for c in self.components.values():
             c.go()
@@ -139,15 +140,24 @@ if __name__ == "__main__":
     from console import ConsoleEchoer
 
     g = Graphline(
-            source = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-            sink = ConsoleEchoer(tag="** BASICTEST 1**"),
-            linkages = {
-                ("source","output") : ("sink","input"),
-                ("source","signal") : ("sink","control")
-            }
+                   p = Pipeline(
+                                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                ConsoleEchoer(tag="** BASICTEST 1**")
+                               )
         )
     g.go()
     wait_for(g)
+
+    #g = Graphline(
+            #source = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+            #sink = ConsoleEchoer(tag="** BASICTEST 1**"),
+            #linkages = {
+                #("source","output") : ("sink","input"),
+                #("source","signal") : ("sink","control")
+            #}
+        #)
+    #g.go()
+    #wait_for(g)
 
     if 0:
         p = Pipeline(
