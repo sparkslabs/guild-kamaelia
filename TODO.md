@@ -27,10 +27,10 @@ It might be they improve though.
     from guild.kamaelia import Backplane            # from Kamaelia.Util.Backplane
     from guild.kamaelia import PublishTo            # from Kamaelia.Util.Backplane
     from guild.kamaelia import SubscribeTo          # from Kamaelia.Util.Backplane
+    from guild.kamaelia import SimpleFileWriter     # from Kamaelia.File.Writing
 
 ## WIP
 
-    from guild.kamaelia import SimpleFileWriter     # from Kamaelia.File.Writing
 
 ## Core
 
