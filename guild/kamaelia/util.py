@@ -13,7 +13,7 @@ import logging
 import time
 
 #FIXME: This isn't ideal, but better than nothing for the moment
-for actor_class_name in ["PureTransformer" ]:
+for actor_class_name in ["PureTransformer", "Backplane", "PublishTo", "SubscribeTo" ]:
     logger = logging.getLogger(__name__ +"." + actor_class_name)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
