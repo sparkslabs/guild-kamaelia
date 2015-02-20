@@ -9,7 +9,7 @@ import sys as _sys
 
 
 #FIXME: This isn't ideal, but better than nothing for the moment
-for actor_class_name in ["ConsoleEchoer" ]:
+for actor_class_name in ["Pipeline" ]:
     logger = logging.getLogger(__name__ +"." + actor_class_name)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -33,48 +33,54 @@ class Pipeline(Actor):
             pass
         
     def process_start(self):
-        last = self.components[0]
-        for dest in self.components[1:]:
-            pipe(last,"output", dest,"input") # FIXME: Should this be inbox/input , outbox/output ?
-            pipe(last,"signal", dest,"control")
-            last = dest # Keep track of last
-        if self.circular:
-            pipe(last,"output", self.components[0],"input") # FIXME: Should this be inbox/input , outbox/output ?
-            pipe(last,"signal", self.components[0],"control")
+        if len(self.components) > 0:
+            last = self.components[0]
+            for dest in self.components[1:]:
+                pipe(last,"output", dest,"input") # FIXME: Should this be inbox/input , outbox/output ?
+                pipe(last,"signal", dest,"control")
+                last = dest # Keep track of last
+            if self.circular:
+                pipe(last,"output", self.components[0],"input") # FIXME: Should this be inbox/input , outbox/output ?
+                pipe(last,"signal", self.components[0],"control")
 
-        for dest in self.components:
-            dest.go()
+            for dest in self.components:
+                dest.go()
 
     @process_method
     def process(self):
         "Check to see if the child processes are running. If they aren't, stop"
-        time.sleep(0.5) # Only rarely check.
-        children_running = True
-        for component in self.components:
-            children_running = children_running or component.is_alive()
-        if not children_running:
-            self.stop()
+        if len(self.components) >0:
+            time.sleep(0.1) # Only rarely check.
+            children_running = False
+            for component in self.components:
+                children_running = children_running or component.is_alive()
+            if not children_running:
+                self.stop()
 
     @actor_method
     def bind(self, source_box, dest, destmeth):
         # Bind our output function to their input
         # In this case it means bind our last child's output...
-        self.components[-1].bind(source_box, dest, destmeth)
+        if len(self.components):
+            self.components[-1].bind(source_box, dest, destmeth)
+        else:
+            super(Pipeline, self).bind(source_box, dest, destmeth)
 
-    # These are probably bypassed, but for now left in place.
+    # These are bypassed, except in the empty state
     @actor_method
     def input(self, data):
         try:
             self.components[0].input(data)
-        except:
-            pass
+        except IndexError:
+            self.output(data)
  
     @actor_method
     def control(self, data):
         try:
             self.components[0].control(data)
-        except:
-            pass
+        except IndexError:
+            self.signal(data)
+            self.stop() # FIXME: Assume some kind of shutdown message along signal
 
 
     # These two are for introspection, but will not actually be bound to.
@@ -93,9 +99,29 @@ if __name__ == "__main__":
     
     p = Pipeline(
                 ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-                ConsoleEchoer()
+                ConsoleEchoer(tag="** BASICTEST 1**")
         )
-    
     p.go()
+    wait_for(p)
 
+    p = Pipeline(
+                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                Pipeline(),
+                ConsoleEchoer(tag="** BASICTEST 2**")
+        )
+    p.go()
+    wait_for(p)
+
+    p = Pipeline(
+                Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
+                ConsoleEchoer(tag="** BASICTEST 3**")
+        )
+    p.go()
+    wait_for(p)
+
+    p = Pipeline(
+                Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
+                ConsoleEchoer(tag="** BASICTEST 4**")
+        )
+    p.go()
     wait_for(p)
