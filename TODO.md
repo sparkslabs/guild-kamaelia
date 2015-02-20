@@ -22,16 +22,16 @@ It might be they improve though.
     from guild.kamaelia import ConsoleEchoer        # from Kamaelia.Util.Console
     from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
     from guild.kamaelia import Graphline            # from Kamaelia.Chassis.Graphline
+    from guild.kamaelia import PAR                  # from Kamaelia.Chassis.PAR
 
 ## WIP
 
-    from guild.kamaelia import PAR                  # from Kamaelia.Chassis.PAR
+    from guild.kamaelia import PureTransformer      # from Kamaelia.Util.PureTransformer
 
 ## Core
 
 These aren't written yet.
 
-    from guild.kamaelia import PureTransformer      # from Kamaelia.Util.PureTransformer
     from guild.kamaelia import Backplane            # from Kamaelia.Util.Backplane
     from guild.kamaelia import PublishTo            # from Kamaelia.Util.Backplane
     from guild.kamaelia import SubscribeTo          # from Kamaelia.Util.Backplane

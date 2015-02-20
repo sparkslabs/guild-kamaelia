@@ -6,16 +6,80 @@ and was a bad idea. But hey, that's life.
 from guild.actor import *
 import logging
 import sys as _sys
-
+import time
 
 #FIXME: This isn't ideal, but better than nothing for the moment
-for actor_class_name in ["Pipeline", "Graphline" ]:
+for actor_class_name in ["Pipeline", "Graphline", "PAR"]:
     logger = logging.getLogger(__name__ +"." + actor_class_name)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+
+class PAR(Actor):
+    def __init__(self, *components, **argv):
+        super(PAR,self).__init__(**argv)
+        self.components = list(components)
+
+    def process_start(self):
+        if len(self.components) > 0:
+            #last = self.components[0]
+            #for dest in self.components[1:]:
+                #pipe(last,"output", dest,"input") # FIXME: Should this be inbox/input , outbox/output ?
+                #pipe(last,"signal", dest,"control")
+                #last = dest # Keep track of last
+            #if self.circular:
+                #pipe(last,"output", self.components[0],"input") # FIXME: Should this be inbox/input , outbox/output ?
+                #pipe(last,"signal", self.components[0],"control")
+
+            for dest in self.components:
+                dest.go()
+
+    @process_method
+    def process(self):
+        "Check to see if the child processes are running. If they aren't, stop"
+        if len(self.components) >0:
+            time.sleep(0.001) # Only rarely check.
+            children_running = False
+            for component in self.components:
+                children_running = children_running or component.is_alive()
+            if not children_running:
+                for component in self.components:
+                    component.join()
+                self.stop()
+
+
+    @actor_method
+    def bind(self, source_box, dest, destmeth):
+        # Bind our output function to their input
+        # In this case it means bind our last child's output...
+        if len(self.components):
+            for c in self.components:
+                c.bind(source_box, dest, destmeth)
+        else:
+            super(PAR, self).bind(source_box, dest, destmeth)
+
+    # PAR chooses NOT to forward the data to any of the subcomponents by default
+    # This could actually be subclassed and overridden in this implementation
+    @actor_method
+    def input(self, data):
+        pass
+
+    # PAR chooses NOT to forward the control signal to ALL of the subcomponents by default
+    # This could actually be subclassed and overridden in this implementation
+    @actor_method
+    def control(self, data):
+        if len(self.components):
+            for c in self.components:
+                try:
+                    c.control(data)
+                    c.stop()
+                except AttributeError:
+                    c.stop()
+                    for component in self.components:
+                        component.join()
+                    self.stop()
 
 class Graphline(Actor):
     # First of all we'll aim for graphlines with just standard inboxes/outboxes...
@@ -173,33 +237,52 @@ if __name__ == "__main__":
     import time
     from readfileadaptor import ReadFileAdaptor
     from console import ConsoleEchoer
-    g = Graphline(
-                    source = Graphline(
-                                RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-                                linkages = {
-                                    ("RFA", "output") : ("self", "d_output"),
-                                    ("RFA", "signal") : ("self", "d_signal")
-                                    }
-                            ),
-                    sink = Graphline(
-                                ce = ConsoleEchoer(tag="** BASICTEST 1**"),
-                                linkages = {
-                                    ("self", "d_input") : ("ce", "input"),
-                                    ("self", "d_control") : ("ce", "control")
-                                    }
-                            ),
-                    linkages = {
-                        ("source","d_output") : ("sink","d_input"),
-                        ("source","d_signal") : ("sink","d_control")
-                    }
-
-                )
-
-    g.go()
-    wait_for(g)
+    p = Pipeline(
+                PAR(
+                    Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
+                    Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
+                    Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30))
+                ),
+                ConsoleEchoer(tag="** BASICTEST 4**")
+        )
+    p.go()
+    wait_for(p)
 
 
     if 0:
+        p = Pipeline(
+                    PAR(
+                        Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30))
+                    ),
+                    ConsoleEchoer(tag="** BASICTEST 4**")
+            )
+        p.go()
+        wait_for(p)
+        g = Graphline(
+                        source = Graphline(
+                                    RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    linkages = {
+                                        ("RFA", "output") : ("self", "d_output"),
+                                        ("RFA", "signal") : ("self", "d_signal")
+                                        }
+                                ),
+                        sink = Graphline(
+                                    ce = ConsoleEchoer(tag="** BASICTEST 1**"),
+                                    linkages = {
+                                        ("self", "d_input") : ("ce", "input"),
+                                        ("self", "d_control") : ("ce", "control")
+                                        }
+                                ),
+                        linkages = {
+                            ("source","d_output") : ("sink","d_input"),
+                            ("source","d_signal") : ("sink","d_control")
+                        }
+
+                    )
+
+        g.go()
+        wait_for(g)
+
         g = Graphline(
                         source = Graphline(
                                     RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
