@@ -235,7 +235,7 @@ class Pipeline(Actor):
 
 if __name__ == "__main__":
     import time
-    from readfileadaptor import ReadFileAdaptor
+    from file import ReadFileAdaptor
     from console import ConsoleEchoer
     p = Pipeline(
                 PAR(

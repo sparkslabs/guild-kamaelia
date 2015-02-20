@@ -127,7 +127,7 @@ class SubscribeTo(Actor):
 if __name__ == "__main__":
     from chassis import Pipeline
     from console import ConsoleEchoer
-    from readfileadaptor import ReadFileAdaptor
+    from file import ReadFileAdaptor
 
     bp = Backplane("Example").go()
 
@@ -142,7 +142,6 @@ if __name__ == "__main__":
                  ).go()
 
     wait_KeyboardInterrupt()
-
 
     if 0:
         Pipeline(

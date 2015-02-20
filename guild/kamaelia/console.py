@@ -58,7 +58,7 @@ class ConsoleEchoer(Actor):
 
 if __name__ == "__main__":
     import time
-    from readfileadaptor import ReadFileAdaptor
+    from file import ReadFileAdaptor
     
     producer = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)
     consumer = ConsoleEchoer()
