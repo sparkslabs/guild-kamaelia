@@ -140,7 +140,11 @@ if __name__ == "__main__":
     from console import ConsoleEchoer
 
     g = Graphline(
-                   p = Pipeline(
+                   p1 = Pipeline(
+                                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                ConsoleEchoer(tag="** BASICTEST 1**")
+                               ),
+                   p2 = Pipeline(
                                 ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
                                 ConsoleEchoer(tag="** BASICTEST 1**")
                                )
@@ -148,16 +152,25 @@ if __name__ == "__main__":
     g.go()
     wait_for(g)
 
-    #g = Graphline(
-            #source = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-            #sink = ConsoleEchoer(tag="** BASICTEST 1**"),
-            #linkages = {
-                #("source","output") : ("sink","input"),
-                #("source","signal") : ("sink","control")
-            #}
-        #)
-    #g.go()
-    #wait_for(g)
+    if 0:
+        g = Graphline(
+                    p = Pipeline(
+                                    ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    ConsoleEchoer(tag="** BASICTEST 1**")
+                                )
+            )
+        g.go()
+        wait_for(g)
+        g = Graphline(
+                source = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                sink = ConsoleEchoer(tag="** BASICTEST 1**"),
+                linkages = {
+                    ("source","output") : ("sink","input"),
+                    ("source","signal") : ("sink","control")
+                }
+            )
+        g.go()
+        wait_for(g)
 
     if 0:
         p = Pipeline(
