@@ -9,6 +9,13 @@ Key point - this isn't about improving or changing the component functionality, 
 about bringing the functionality into Guild with the same API as Kamaelia - for good
 or ill. This is why this is a seperate project from guild.
 
+## NOTE
+
+**The chassis components here are hideously inefficient, and are NOT the preferred**
+**way of running a guild system. They are provided for compatibility only.**
+
+It might be they improve though.
+
 ## Done
 
     from guild.kamaelia import ReadFileAdaptor      # from Kamaelia.File.ReadFileAdaptor
