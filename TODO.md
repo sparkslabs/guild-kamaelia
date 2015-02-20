@@ -23,18 +23,18 @@ It might be they improve though.
     from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
     from guild.kamaelia import Graphline            # from Kamaelia.Chassis.Graphline
     from guild.kamaelia import PAR                  # from Kamaelia.Chassis.PAR
+    from guild.kamaelia import PureTransformer      # from Kamaelia.Util.PureTransformer
 
 ## WIP
 
-    from guild.kamaelia import PureTransformer      # from Kamaelia.Util.PureTransformer
+    from guild.kamaelia import Backplane            # from Kamaelia.Util.Backplane
+    from guild.kamaelia import PublishTo            # from Kamaelia.Util.Backplane
+    from guild.kamaelia import SubscribeTo          # from Kamaelia.Util.Backplane
 
 ## Core
 
 These aren't written yet.
 
-    from guild.kamaelia import Backplane            # from Kamaelia.Util.Backplane
-    from guild.kamaelia import PublishTo            # from Kamaelia.Util.Backplane
-    from guild.kamaelia import SubscribeTo          # from Kamaelia.Util.Backplane
     from guild.kamaelia import SimpleFileWriter     # from Kamaelia.File.Writing
     from guild.kamaelia import FastRestartServer    # from Kamaelia.Chassis.ConnectedServer
     from guild.kamaelia import TCPClient            # from Kamaelia.Internet.TCPClient
