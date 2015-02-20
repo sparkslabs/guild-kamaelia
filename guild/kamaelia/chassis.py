@@ -25,16 +25,26 @@ class Graphline(Actor):
 
         self.border_inlinks = {}
         self.border_outlinks = {}
+
         super(Graphline,self).__init__()
 
+        if self.layout:
+            for componentRef,sourceBox in self.layout:
+                toRef, toBox = self.layout[(componentRef,sourceBox)]
+
+                fromComponent = self.components.get(componentRef, self)
+                toComponent = self.components.get(toRef, self)
+                if fromComponent == self or toComponent == self:
+                    self.borderLinkage(fromComponent, sourceBox, toComponent, toBox)
+                    continue # Don't make a linkage!
+
+                pipe(fromComponent, sourceBox, toComponent, toBox)
+
     def borderLinkage(self, fromComponent, sourceBox, toComponent, toBox):
-        print "DYNAMIC IN LINKAGES NOT TESTED"
-        print "DYNAMIC OUT LINKAGES NOT TESTED"
         if fromComponent == self:
             self.border_inlinks[sourceBox] = toComponent, toBox
             setattr(self, sourceBox, getattr(toComponent, toBox))
 
-            print "INLINK", fromComponent, sourceBox, toComponent, toBox
         else:
             self.border_outlinks[toBox] = fromComponent, sourceBox
 
@@ -46,19 +56,7 @@ class Graphline(Actor):
             component, methodname = self.border_outlinks[source_box]
             component.bind(methodname, dest, destmeth)
 
-
     def process_start(self):
-        if self.layout:
-            for componentRef,sourceBox in self.layout:
-                toRef, toBox = self.layout[(componentRef,sourceBox)]
-
-                fromComponent = self.components.get(componentRef, self)
-                toComponent = self.components.get(toRef, self)
-                if fromComponent == self or toComponent == self:
-                    self.borderLinkage(fromComponent, sourceBox, toComponent, toBox)
-                    continue # skip linkages to/from the graphline for now
-
-                pipe(fromComponent, sourceBox, toComponent, toBox)
 
         for c in self.components.values():
             c.go()
@@ -186,13 +184,13 @@ if __name__ == "__main__":
                     sink = Graphline(
                                 ce = ConsoleEchoer(tag="** BASICTEST 1**"),
                                 linkages = {
-                                    ("self", "input") : ("ce", "input"),
-                                    ("self", "control") : ("ce", "control")
+                                    ("self", "d_input") : ("ce", "input"),
+                                    ("self", "d_control") : ("ce", "control")
                                     }
                             ),
                     linkages = {
-                        ("source","d_output") : ("sink","input"),
-                        ("source","d_signal") : ("sink","control")
+                        ("source","d_output") : ("sink","d_input"),
+                        ("source","d_signal") : ("sink","d_control")
                     }
 
                 )
@@ -202,6 +200,31 @@ if __name__ == "__main__":
 
 
     if 0:
+        g = Graphline(
+                        source = Graphline(
+                                    RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    linkages = {
+                                        ("RFA", "output") : ("self", "d_output"),
+                                        ("RFA", "signal") : ("self", "d_signal")
+                                        }
+                                ),
+                        sink = Graphline(
+                                    ce = ConsoleEchoer(tag="** BASICTEST 1**"),
+                                    linkages = {
+                                        ("self", "input") : ("ce", "input"),
+                                        ("self", "control") : ("ce", "control")
+                                        }
+                                ),
+                        linkages = {
+                            ("source","d_output") : ("sink","input"),
+                            ("source","d_signal") : ("sink","control")
+                        }
+
+                    )
+
+        g.go()
+        wait_for(g)
+
         g = Graphline(
                         source = Graphline(
                                     RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
