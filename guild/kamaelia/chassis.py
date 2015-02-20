@@ -187,7 +187,13 @@ if __name__ == "__main__":
                                     ("RFA", "signal") : ("self", "signal")
                                     }
                             ),
-                    ConsoleEchoer(tag="** BASICTEST 1**"),
+                    Graphline(
+                                ce = ConsoleEchoer(tag="** BASICTEST 1**"),
+                                linkages = {
+                                    ("self", "input") : ("ce", "input"),
+                                    ("self", "control") : ("ce", "control")
+                                    }
+                            )
                 )
 
     p.go()
@@ -195,6 +201,20 @@ if __name__ == "__main__":
 
 
     if 0:
+        p = Pipeline(
+                        Graphline(
+                                    RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    linkages = {
+                                        ("RFA", "output") : ("self", "output"),
+                                        ("RFA", "signal") : ("self", "signal")
+                                        }
+                                ),
+                        ConsoleEchoer(tag="** BASICTEST 1**"),
+                    )
+
+        p.go()
+        wait_for(p)
+
         p = Pipeline(
                     ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
                     Graphline(
