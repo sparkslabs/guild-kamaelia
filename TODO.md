@@ -9,20 +9,27 @@ Key point - this isn't about improving or changing the component functionality, 
 about bringing the functionality into Guild with the same API as Kamaelia - for good
 or ill. This is why this is a seperate project from guild.
 
+## NOTE
+
+**The chassis components here are hideously inefficient, and are NOT the preferred**
+**way of running a guild system. They are provided for compatibility only.**
+
+It might be they improve though.
+
 ## Done
 
     from guild.kamaelia import ReadFileAdaptor      # from Kamaelia.File.ReadFileAdaptor
     from guild.kamaelia import ConsoleEchoer        # from Kamaelia.Util.Console
+    from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
 
 ## WIP
 
-    from guild.kamaelia import Pipeline             # from Kamaelia.Chassis.Pipeline
+    from guild.kamaelia import Graphline            # from Kamaelia.Chassis.Graphline
 
 ## Core
 
 These aren't written yet.
 
-    from guild.kamaelia import Graphline            # from Kamaelia.Chassis.Graphline
     from guild.kamaelia import PureTransformer      # from Kamaelia.Util.PureTransformer
     from guild.kamaelia import PAR                  # from Kamaelia.Chassis.PAR
     from guild.kamaelia import Backplane            # from Kamaelia.Util.Backplane
@@ -61,4 +68,14 @@ These aren't written yet.
     from guild.kamaelia import PromptedFileReader   # from Kamaelia.File.Reading
     from guild.kamaelia import RateControlledFileReader # from Kamaelia.File.Reading
 
+## Ideas arising
+
+### Possible new names or alternatives for Graphline
+
+In particular, worth noting that Graphline actually subsumbes the
+functionality of PAR
+
+from guild.kamaelia import Breadboard # Graphline?  No, no new names in this namespace
+from guild.kamaelia import Composite # Graphline?   No, no new names in this namespace
+from guild.kamaelia import Compound # Graphline?   No, no new names in this namespace
 
