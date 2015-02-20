@@ -139,6 +139,8 @@ if __name__ == "__main__":
     from readfileadaptor import ReadFileAdaptor
     from console import ConsoleEchoer
 
+    # This usecase is very similar to PAR
+    #
     g = Graphline(
                    p1 = Pipeline(
                                 ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
