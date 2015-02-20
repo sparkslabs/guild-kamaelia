@@ -179,28 +179,52 @@ if __name__ == "__main__":
     import time
     from readfileadaptor import ReadFileAdaptor
     from console import ConsoleEchoer
-    p = Pipeline(
-                    Graphline(
+    g = Graphline(
+                    source = Graphline(
                                 RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
                                 linkages = {
                                     ("RFA", "output") : ("self", "output"),
                                     ("RFA", "signal") : ("self", "signal")
                                     }
                             ),
-                    Graphline(
+                    sink = Graphline(
                                 ce = ConsoleEchoer(tag="** BASICTEST 1**"),
                                 linkages = {
                                     ("self", "input") : ("ce", "input"),
                                     ("self", "control") : ("ce", "control")
                                     }
-                            )
+                            ),
+                    linkages = {
+                        ("source","output") : ("sink","input"),
+                        ("source","signal") : ("sink","control")
+                    }
+
                 )
 
-    p.go()
-    wait_for(p)
+    g.go()
+    wait_for(g)
 
 
     if 0:
+        p = Pipeline(
+                        Graphline(
+                                    RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    linkages = {
+                                        ("RFA", "output") : ("self", "output"),
+                                        ("RFA", "signal") : ("self", "signal")
+                                        }
+                                ),
+                        Graphline(
+                                    ce = ConsoleEchoer(tag="** BASICTEST 1**"),
+                                    linkages = {
+                                        ("self", "input") : ("ce", "input"),
+                                        ("self", "control") : ("ce", "control")
+                                        }
+                                )
+                    )
+
+        p.go()
+        wait_for(p)
         p = Pipeline(
                         Graphline(
                                     RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
