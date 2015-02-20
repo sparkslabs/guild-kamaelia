@@ -11,7 +11,7 @@ import logging
 import math
 
 #FIXME: This isn't ideal, but better than nothing for the moment
-for actor_class_name in ["ReadFileAdaptor" ]:
+for actor_class_name in ["ReadFileAdaptor", "SimpleFileWriter" ]:
     logger = logging.getLogger(__name__ +"." + actor_class_name)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -45,6 +45,7 @@ class ReadFileAdaptor(Actor):
         self.steptime = steptime
         self.getData = self.getDataByteLen
         self.time = time.time()
+        self.tosend = []
 
         if readmode=="bitrate":
             self.bitrate = bitrate
@@ -105,18 +106,61 @@ class ReadFileAdaptor(Actor):
         If we had an error state (eg EOF), we return 0, stopping this component, otherwise
         we return 1 to live for another line/block.
         """
+        if len(self.tosend)>0:
+            for data in self.tosend:
+                try:
+                    self.output(data) # We kinda assume people are listening...
+                except UnboundActorMethod:
+                    time.sleep(0.01)
+                    return
+            self.tosend = []
+            
         if ((time.time() - self.time) > self.steptime):
             self.time = time.time()
             data = self.getData()
 
             if data:
-                self.output(data) # We kinda assume people are listening...
+                try:
+                    self.output(data) # We kinda assume people are listening...
+                except UnboundActorMethod:
+                    self.tosend.append(data)
+                    return
                 if self.debug:
                     sys.stdout.write(data)
                     sys.stdout.flush()
             else:
                 return False # Exit the loop
-    
+
+    @actor_method
+    def control(self,data):
+        self.signal(data)
+        self.stop()
+
+    @late_bind_safe
+    def signal(self, signal_data):
+        pass
+
+    @late_bind
+    def output(self, data):
+        pass
+
+    # For Kamaelia compatibility...
+    inbox = input
+    outbox = output
+
+class SimpleFileWriter(Actor):
+    def __init__(self, filename, mode = "wb"):
+        self.filename = filename
+        self.mode = mode
+        super(SimpleFileWriter, self).__init__()
+
+    def process_start(self):
+        self.fh = open(self.filename, self.mode, 0)
+
+    @actor_method
+    def input(self, data):
+        self.fh.write(data)
+
     @late_bind_safe
     def output(self, data):
         pass
@@ -124,10 +168,12 @@ class ReadFileAdaptor(Actor):
     @late_bind_safe
     def signal(self, signal_data):
         pass
-    
-    # For Kamaelia compatibility...
-    inbox = input
-    outbox = output
+
+    @actor_method
+    def control(self,data):
+        self.signal(data)
+        self.stop()
+
 
 if __name__ == "__main__":
     import sys
@@ -140,14 +186,28 @@ if __name__ == "__main__":
             sys.stderr.write(argv_print)
             sys.stderr.write("\n")
 
-    p = Printer().go()
-    testfile="ReadFileAdaptor.py"
-    rfa = ReadFileAdaptor(testfile, readmode="bitrate", bitrate=420, chunkrate=30,debug=1).go()
-    pipe(rfa, "output", p, "Print")
+    from chassis import Pipeline
+    from util import PureTransformer
     
-    wait_for(rfa)
-    p.stop()
+    testfile="file.py"
+    p = Pipeline(
+            ReadFileAdaptor(testfile, chunkrate=30),
+            PureTransformer(lambda x : x.rstrip()),
+            PureTransformer(lambda y : time.asctime() + ":" + y + "\n"),
+            SimpleFileWriter("testfile")
+        )
+
+    p.go()
     wait_for(p)
+
+    if 0:
+        p = Printer().go()
+        rfa = ReadFileAdaptor(testfile, readmode="bitrate", bitrate=420, chunkrate=30,debug=1).go()
+        pipe(rfa, "output", p, "Print")
+        
+        wait_for(rfa)
+        p.stop()
+        wait_for(p)
 
 
 
