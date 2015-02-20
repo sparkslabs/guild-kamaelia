@@ -23,13 +23,9 @@ class Graphline(Actor):
         self.layout = linkages
         self.components = dict(components)
 
-        self.addExternalPostboxes()
         self.border_inlinks = {}
         self.border_outlinks = {}
         super(Graphline,self).__init__()
-
-    def addExternalPostboxes(self):
-        print "EXTERNAL POSTBOXES NOT DONE"
 
     def borderLinkage(self, fromComponent, sourceBox, toComponent, toBox):
         print "DYNAMIC IN LINKAGES NOT TESTED"
@@ -183,8 +179,8 @@ if __name__ == "__main__":
                     source = Graphline(
                                 RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
                                 linkages = {
-                                    ("RFA", "output") : ("self", "output"),
-                                    ("RFA", "signal") : ("self", "signal")
+                                    ("RFA", "output") : ("self", "d_output"),
+                                    ("RFA", "signal") : ("self", "d_signal")
                                     }
                             ),
                     sink = Graphline(
@@ -195,8 +191,8 @@ if __name__ == "__main__":
                                     }
                             ),
                     linkages = {
-                        ("source","output") : ("sink","input"),
-                        ("source","signal") : ("sink","control")
+                        ("source","d_output") : ("sink","input"),
+                        ("source","d_signal") : ("sink","control")
                     }
 
                 )
@@ -206,6 +202,30 @@ if __name__ == "__main__":
 
 
     if 0:
+        g = Graphline(
+                        source = Graphline(
+                                    RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    linkages = {
+                                        ("RFA", "output") : ("self", "output"),
+                                        ("RFA", "signal") : ("self", "signal")
+                                        }
+                                ),
+                        sink = Graphline(
+                                    ce = ConsoleEchoer(tag="** BASICTEST 1**"),
+                                    linkages = {
+                                        ("self", "input") : ("ce", "input"),
+                                        ("self", "control") : ("ce", "control")
+                                        }
+                                ),
+                        linkages = {
+                            ("source","output") : ("sink","input"),
+                            ("source","signal") : ("sink","control")
+                        }
+
+                    )
+
+        g.go()
+        wait_for(g)
         p = Pipeline(
                         Graphline(
                                     RFA = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
