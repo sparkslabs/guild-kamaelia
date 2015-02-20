@@ -71,7 +71,7 @@ class Graphline(Actor):
     def process(self):
         "Check to see if the child processes are running. If they aren't, stop"
         if len(self.components.values()) >0:
-            time.sleep(0.1) # Only rarely check.
+            time.sleep(0.001) # Only rarely check.
             children_running = False
             for component in self.components.values():
                 children_running = children_running or component.is_alive()
@@ -131,7 +131,7 @@ class Pipeline(Actor):
     def process(self):
         "Check to see if the child processes are running. If they aren't, stop"
         if len(self.components) >0:
-            time.sleep(0.1) # Only rarely check.
+            time.sleep(0.001) # Only rarely check.
             children_running = False
             for component in self.components:
                 children_running = children_running or component.is_alive()
