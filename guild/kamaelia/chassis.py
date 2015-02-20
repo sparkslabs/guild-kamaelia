@@ -9,7 +9,7 @@ import sys as _sys
 
 
 #FIXME: This isn't ideal, but better than nothing for the moment
-for actor_class_name in ["Pipeline" ]:
+for actor_class_name in ["Pipeline", "Graphline" ]:
     logger = logging.getLogger(__name__ +"." + actor_class_name)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -17,6 +17,47 @@ for actor_class_name in ["Pipeline" ]:
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+class Graphline(Actor):
+    # First of all we'll aim for graphlines with just standard inboxes/outboxes...
+    def __init__(self, linkages = None, **components):
+        self.layout = linkages
+        self.components = dict(components)
+
+        self.addExternalPostboxes()
+
+        super(Graphline,self).__init__()
+
+    def addExternalPostboxes(self):
+        print "EXTERNAL POSTBOXES NOT DONE"
+
+    def borderLinkage(self):
+        print "BORDER LINKAGES NOT DONE"
+
+    def process_start(self):
+        for componentRef,sourceBox in self.layout:
+            toRef, toBox = self.layout[(componentRef,sourceBox)]
+
+            fromComponent = self.components.get(componentRef, self)
+            toComponent = self.components.get(toRef, self)
+            if fromComponent == self or toComponent == self:
+                self.borderLinkage()
+                continue # skip linkages to/from the graphline for now
+
+            pipe(fromComponent, sourceBox, toComponent, toBox)
+
+        for c in self.components.values():
+            c.go()
+
+    @process_method
+    def process(self):
+        "Check to see if the child processes are running. If they aren't, stop"
+        if len(self.components.values()) >0:
+            time.sleep(0.1) # Only rarely check.
+            children_running = False
+            for component in self.components.values():
+                children_running = children_running or component.is_alive()
+            if not children_running:
+                self.stop()
 
 class Pipeline(Actor):
     circular = False
@@ -96,32 +137,44 @@ if __name__ == "__main__":
     import time
     from readfileadaptor import ReadFileAdaptor
     from console import ConsoleEchoer
-    
-    p = Pipeline(
-                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-                ConsoleEchoer(tag="** BASICTEST 1**")
-        )
-    p.go()
-    wait_for(p)
 
-    p = Pipeline(
-                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-                Pipeline(),
-                ConsoleEchoer(tag="** BASICTEST 2**")
+    g = Graphline(
+            source = ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+            sink = ConsoleEchoer(tag="** BASICTEST 1**"),
+            linkages = {
+                ("source","output") : ("sink","input"),
+                ("source","signal") : ("sink","control")
+            }
         )
-    p.go()
-    wait_for(p)
+    g.go()
+    wait_for(g)
 
-    p = Pipeline(
-                Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
-                ConsoleEchoer(tag="** BASICTEST 3**")
-        )
-    p.go()
-    wait_for(p)
+    if 0:
+        p = Pipeline(
+                    ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                    ConsoleEchoer(tag="** BASICTEST 1**")
+            )
+        p.go()
+        wait_for(p)
 
-    p = Pipeline(
-                Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
-                ConsoleEchoer(tag="** BASICTEST 4**")
-        )
-    p.go()
-    wait_for(p)
+        p = Pipeline(
+                    ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                    Pipeline(),
+                    ConsoleEchoer(tag="** BASICTEST 2**")
+            )
+        p.go()
+        wait_for(p)
+
+        p = Pipeline(
+                    Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
+                    ConsoleEchoer(tag="** BASICTEST 3**")
+            )
+        p.go()
+        wait_for(p)
+
+        p = Pipeline(
+                    Pipeline(ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30)),
+                    ConsoleEchoer(tag="** BASICTEST 4**")
+            )
+        p.go()
+        wait_for(p)
