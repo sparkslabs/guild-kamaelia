@@ -24,14 +24,24 @@ class Graphline(Actor):
         self.components = dict(components)
 
         self.addExternalPostboxes()
-
+        self.border_inlinks = {}
+        self.border_outlinks = {}
         super(Graphline,self).__init__()
 
     def addExternalPostboxes(self):
         print "EXTERNAL POSTBOXES NOT DONE"
 
-    def borderLinkage(self):
-        print "BORDER LINKAGES NOT DONE"
+    def borderLinkage(self, fromComponent, sourceBox, toComponent, toBox):
+        print "OUT LINKAGES NOT WRITTEN"
+        print "DYNAMIC IN LINKAGES NOT TESTED"
+        print "DYNAMIC OUT LINKAGES NOT TESTED"
+        if fromComponent == self:
+            self.border_inlinks[sourceBox] = toComponent, toBox
+            setattr(self, sourceBox, getattr(toComponent, toBox))
+
+            print "INLINK", fromComponent, sourceBox, toComponent, toBox
+        else:
+            self.border_outlinks[toBox] = fromComponent, sourceBox
 
     def process_start(self):
         if self.layout:
@@ -41,7 +51,7 @@ class Graphline(Actor):
                 fromComponent = self.components.get(componentRef, self)
                 toComponent = self.components.get(toRef, self)
                 if fromComponent == self or toComponent == self:
-                    self.borderLinkage()
+                    self.borderLinkage(fromComponent, sourceBox, toComponent, toBox)
                     continue # skip linkages to/from the graphline for now
 
                 pipe(fromComponent, sourceBox, toComponent, toBox)
@@ -58,7 +68,28 @@ class Graphline(Actor):
             for component in self.components.values():
                 children_running = children_running or component.is_alive()
             if not children_running:
+                for component in self.components.values():
+                    component.join()
                 self.stop()
+
+    # These should be bypassed, except in the empty state
+    @actor_method
+    def input(self, data):
+        try:
+            toComponent, toBox = self.border_inlinks["input"]
+            func = getattr(toComponent, toBox)
+            func(data)
+        except:
+            pass
+
+    @actor_method
+    def control(self, data):
+        try:
+            toComponent, toBox = self.border_inlinks["control"]
+            func = getattr(toComponent, toBox)
+            func(data)
+        except:
+            pass
 
 class Pipeline(Actor):
     circular = False
@@ -97,6 +128,8 @@ class Pipeline(Actor):
             for component in self.components:
                 children_running = children_running or component.is_alive()
             if not children_running:
+                for component in self.components:
+                    component.join()
                 self.stop()
 
     @actor_method
@@ -141,20 +174,34 @@ if __name__ == "__main__":
 
     # This usecase is very similar to PAR
     #
-    g = Graphline(
-                   p1 = Pipeline(
-                                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-                                ConsoleEchoer(tag="** BASICTEST 1**")
-                               ),
-                   p2 = Pipeline(
-                                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
-                                ConsoleEchoer(tag="** BASICTEST 1**")
-                               )
-        )
-    g.go()
-    wait_for(g)
+    p = Pipeline(
+                ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                Graphline(
+                            ce = ConsoleEchoer(tag="** BASICTEST 1**"),
+                            linkages = {
+                                ("self", "input") : ("ce", "input"),
+                                ("self", "control") : ("ce", "control")
+                                }
+                        )
+                )
+
+    p.go()
+    wait_for(p)
 
     if 0:
+        g = Graphline(
+                    p1 = Pipeline(
+                                    ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    ConsoleEchoer(tag="** BASICTEST 1**")
+                                ),
+                    p2 = Pipeline(
+                                    ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
+                                    ConsoleEchoer(tag="** BASICTEST 1**")
+                                )
+            )
+        g.go()
+        wait_for(g)
+
         g = Graphline(
                     p = Pipeline(
                                     ReadFileAdaptor("console.py", readmode="bitrate", chunkrate=30),
