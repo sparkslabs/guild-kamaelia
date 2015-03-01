@@ -3,3 +3,4 @@ recursive-include bin *
 recursive-include doc *
 recursive-include config *
 include README
+include stdeb.cfg

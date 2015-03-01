@@ -31,11 +31,11 @@ packages = find_packages(".")
 package_names = packages.keys()
 
 setup(name = "guild-kamaelia",
-      version = "0.0.1",
+      version = "0.0.2",
       description = "Kamaelia partial-compatibility layer for guild",
       url='http://www.sparkslabs.com/michael/',
-      author='Michael Sparks',
-      author_email='michael.sparks@rd.bbc.co.uk',
+      author='Michael Sparks (sparkslabs)',
+      author_email="sparks.m@gmail.com",
       license='Apache Software License',
 
       packages = package_names,

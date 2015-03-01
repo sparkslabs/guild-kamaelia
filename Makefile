@@ -1,7 +1,7 @@
 PYTHON=`which python`
 DESTDIR=/
 PROJECT=guild-kamaelia
-VERSION=0.0.1
+VERSION=0.0.2
 
 all:
 	@echo "make source - Create source package"
@@ -19,6 +19,10 @@ install:
 deb:
 	python setup.py sdist
 	cd dist && py2dsc $(PROJECT)-* && cd deb_dist/$(PROJECT)-$(VERSION) && debuild -uc -us
+
+ppadeb:
+	python setup.py sdist
+	cd dist && py2dsc $(PROJECT)-* && cd deb_dist/$(PROJECT)-$(VERSION) && debuild -S && dput ppa:sparkslabs/packages $(PROJECT)_*_source.changes
 
 use:
 	sudo dpkg -i dist/deb_dist/python-$(PROJECT)*deb
