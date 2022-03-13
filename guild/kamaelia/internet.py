@@ -29,6 +29,8 @@ class ServerCore(Actor):
     def __init__(self, **argd):
         self.__dict__.update(argd)
 
+        raise NotImplementedError("Not actually implemented")
+
         self.connectedSockets = []
         self.server = None
         if not self.protocol:
